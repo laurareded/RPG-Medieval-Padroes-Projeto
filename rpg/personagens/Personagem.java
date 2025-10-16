@@ -1,6 +1,7 @@
 package rpg.personagens;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import rpg.armas.Arma;
 import rpg.efeitos.StatusEffect;
@@ -10,14 +11,12 @@ public abstract class Personagem {
     protected int vida;
     protected int vidaMaxima;
     protected int mana;
-    protected int manaMaxima; 
+    protected int manaMaxima;
     protected int forca;
     protected int destreza;
     protected int inteligencia;
 
-
     protected Arma armaEquipada; 
-    
     protected List<StatusEffect> efeitosAtivos = new ArrayList<>();
 
     public Personagem(String nome, int vida, int mana, int forca, int destreza, int inteligencia) {
@@ -53,51 +52,66 @@ public abstract class Personagem {
     }
 
     public void receberDano(int danoBruto) {
+        int danoFinal = danoBruto;
 
-        int danoReduzido = aplicarPassivaDefesa(danoBruto); 
-        this.vida -= danoReduzido;
+        danoFinal = aplicarPassivaDefesa(danoFinal); 
+
+        double multiplicadorVulnerabilidade = 1.0;
+        boolean isVulnerable = false;
+
+        for (StatusEffect efeito : new ArrayList<>(efeitosAtivos)) { 
+            if (efeito.getNome().equals("Vulnerabilidade")) {
+                multiplicadorVulnerabilidade += 0.25; 
+                isVulnerable = true;
+            }
+        }
+        
+        danoFinal = (int) (danoFinal * multiplicadorVulnerabilidade);
+        
+        if (isVulnerable) {
+            System.out.println("   [Vulnerável] Dano recebido aumentado para " + danoFinal + ".");
+        }
+        
+        this.vida -= danoFinal;
         if (this.vida < 0) this.vida = 0;
-        System.out.println("   " + nome + " recebeu " + danoReduzido + " de dano. Vida restante: " + vida);
+        
+        System.out.println("   " + this.nome + " recebeu " + danoFinal + " de dano. Vida restante: " + vida);
+        
+        if (this.vida <= 0) {
+            System.out.println("   " + this.nome + " foi derrotado!");
+        }
     }
     
     public void adicionarEfeito(StatusEffect efeito) {
- 
         efeitosAtivos.add(efeito);
     }
 
     public void aplicarEfeitosDeTurno() {
-
         efeitosAtivos.forEach(e -> e.aplicarEfeito(this));
         
-
-        efeitosAtivos.forEach(StatusEffect::decrementarTurno);
-        efeitosAtivos.removeIf(e -> !e.isAtivo());
+        for (Iterator<StatusEffect> iterator = efeitosAtivos.iterator(); iterator.hasNext();) {
+            StatusEffect efeito = iterator.next();
+            efeito.decrementarTurno();
+            if (!efeito.isAtivo()) {
+                iterator.remove();
+            }
+        }
 
         aplicarPassivaTurno();
     }
     
-
     protected abstract int aplicarPassivaDefesa(int danoBruto); 
     protected abstract void aplicarPassivaTurno();              
     
     public boolean estaVivo() { return vida > 0; }
     
-
     public int getForca() { return forca; }
     public int getDestreza() { return destreza; }
     public int getInteligencia() { return inteligencia; }
     public String getNome() { return nome; }
     public int getMana() { return mana; }
-    public int getVida() { return vida; } 
-    
-
-    public List<StatusEffect> getEfeitosAtivos() {
-        return efeitosAtivos;
-    }
-    
-    public void setMana(int novaMana) {
-        this.mana = novaMana;
-    }
-    
+    public int getVida() { return vida; }
+    public List<StatusEffect> getEfeitosAtivos() { return efeitosAtivos; }
+    public void setMana(int novaMana) { this.mana = novaMana; }
     public int getManaMaxima() { return manaMaxima; }
 }

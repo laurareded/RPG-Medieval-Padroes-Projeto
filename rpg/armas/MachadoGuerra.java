@@ -4,13 +4,14 @@ import java.util.Random;
 import rpg.efeitos.AtordoadoEffect;
 import rpg.personagens.Personagem;
 
-
 public class MachadoGuerra implements Arma {
     private static final Random RAND = new Random();
+    
     private static final int DANO_BASE = 18;
     private static final int CUSTO_MANA = 5;
     private static final int REQUISITO_FORCA = 15;
-    private static final int CHANCE_ATORDOAR = 25; // 25%
+    private static final int CHANCE_ATORDOAR = 25; 
+    private static final int CHANCE_CRITICO = 15; 
 
     @Override
     public String getNome() {
@@ -43,13 +44,19 @@ public class MachadoGuerra implements Arma {
             System.out.println("   [Ataque Falhou] Mana insuficiente para usar " + getNome() + ".");
             return;
         }
-
         atacante.setMana(atacante.getMana() - CUSTO_MANA); 
 
+        int danoBase = DANO_BASE + atacante.getForca() / 2; 
+        int danoAleatorio = danoBase + RAND.nextInt(5) - 2; 
+        boolean isCritico = RAND.nextInt(100) < CHANCE_CRITICO;
 
-        int danoFinal = DANO_BASE;
-        System.out.println(atacante.getNome() + " desfere " + getNome() + ", causando " + danoFinal + " de dano.");
+        int danoFinal = danoAleatorio;
+        if (isCritico) {
+            danoFinal *= 2;
+            System.out.println("   -> [CRÍTICO!] Dano duplicado!");
+        }
         
+        System.out.println(atacante.getNome() + " desfere " + getNome() + ", causando " + danoFinal + " de dano.");
         alvo.receberDano(danoFinal);
 
         if (RAND.nextInt(100) < CHANCE_ATORDOAR) {
