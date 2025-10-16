@@ -10,8 +10,8 @@ public class Katana implements Arma {
     private static final int CUSTO_MANA = 10;
     private static final int REQUISITO_STR = 10;
     private static final int REQUISITO_DEX = 10;
-    private static final int CHANCE_VULNERABILIDADE = 40; // 40%
-    private static final int CHANCE_CRITICO = 15; // 15%
+    private static final int CHANCE_VULNERABILIDADE = 40; 
+    private static final int CHANCE_CRITICO = 15; 
 
     @Override
     public String getNome() { return "Katana"; }
